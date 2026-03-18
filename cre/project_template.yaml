@@ -1,0 +1,18 @@
+# ==========================================================================
+# CRE PROJECT SETTINGS FILE
+# ==========================================================================
+# Configure your RPC endpoints here.
+
+# ==========================================================================
+# Attestation workflow
+save-attester:
+  rpcs:
+    - chain-name: ethereum-mainnet
+      url: <YOUR_RPC_URL_MAINNET>
+
+# ==========================================================================
+# Verification workflow
+save-verifier:
+  rpcs:
+    - chain-name: ethereum-mainnet
+      url: <YOUR_RPC_URL_MAINNET>

@@ -1,0 +1,21 @@
+# ==========================================================================
+# CRE WORKFLOW SETTINGS FILE
+# ==========================================================================
+# Attestation workflow for SAVE POR (Proof of Reserves)
+#
+# Targets:
+#   save-attester: Main attestation workflow
+#
+# Usage:
+#   cre workflow simulate --target save-attester
+#   cre workflow deploy --target save-attester
+#   cre workflow activate --target save-attester
+
+# ==========================================================================
+save-attester:
+  user-workflow:
+    workflow-name: "save_por_attestation"
+  workflow-artifacts:
+    workflow-path: "./main.ts"
+    config-path: "./config.template.json"
+    secrets-path: "../secrets.yaml"

@@ -1,0 +1,55 @@
+{
+  "name": "midas_por_mhyper_attestation",
+  "newClaimLogTrigger": {
+    "chainSelectorName": "ethereum-mainnet",
+    "address": "0x2D6e9F608807436DE5D9603B00Abe3FEd1Bc809d",
+    "topics": [
+      {
+        "values": ["0x72b189dd90d0f37602e786b240689da1e2575b2e48c418dcf9f6ae1a4ca7b501"]
+      },
+      {
+        "values": ["0xAC9A528065AFB4290AB62FB0EE1A9110D48ED834454D2D04AB369B4832BBDA7A"]
+      },
+      {
+        "values": []
+      },
+      {
+        "values": ["0xcc87f19449516091d35e3902a7e517dc47d90c22caf98d2969b8313214bf408e"]
+      }
+    ],
+    "confidence": "finalized"
+  },
+  "httpTrigger": {
+    "authorizedKeys": [
+      {
+        "type": "KEY_TYPE_ECDSA_EVM",
+        "publicKey": "<YOUR_AUTHORIZED_KEY_ADDRESS>"
+      }
+    ]
+  },
+  "attesterProxy": {
+    "address": "<YOUR_ATTESTER_PROXY_ADDRESS>",
+    "gasLimit": "1000000",
+    "readConfidence": "finalized"
+  },
+  "ipfsHttpEndpoint": {
+    "url": "https://ipfs.io"
+  },
+  "ipfsRpcEndpoint": {
+    "url": "<YOUR_IPFS_RPC_URL>",
+    "username": "<YOUR_IPFS_USERNAME>"
+  },
+  "vlayerEndpoint": {
+    "url": "https://web-prover.vlayer.xyz/api/v1/verify",
+    "clientId": "<YOUR_VLAYER_CLIENT_ID>"
+  },
+  "attester": {
+    "publicKey": "<YOUR_ATTESTER_PUBLIC_KEY>"
+  },
+  "fundManager": {
+    "expectedEmail": "mhyper@hyperithm.com",
+    "requiredReceiverEmail": "midas@vlayer.xyz",
+    "allowedReceiverEmails": [],
+    "tokenName": "mHYPER"
+  }
+}

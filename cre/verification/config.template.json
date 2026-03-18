@@ -1,0 +1,47 @@
+{
+  "name": "midas_por_mhyper_verification",
+  "attestationSetLogTrigger": {
+    "chainSelectorName": "ethereum-mainnet",
+    "address": "0x2D6e9F608807436DE5D9603B00Abe3FEd1Bc809d",
+    "topics": [
+      {
+        "values": ["0x9e49776c5287164e09f584ffc1d95620421d3193b4e4b6a88bee160aedbc7b5b"]
+      },
+      {
+        "values": ["0xAC9A528065AFB4290AB62FB0EE1A9110D48ED834454D2D04AB369B4832BBDA7A"]
+      },
+      {
+        "values": []
+      }
+    ],
+    "confidence": "finalized"
+  },
+  "httpTrigger": {
+    "authorizedKeys": [
+      {
+        "type": "KEY_TYPE_ECDSA_EVM",
+        "publicKey": "<YOUR_AUTHORIZED_KEY>"
+      }
+    ]
+  },
+  "verifierProxy": {
+    "address": "<YOUR_VERIFIER_PROXY_ADDRESS>",
+    "gasLimit": "1000000",
+    "readConfidence": "finalized"
+  },
+  "ipfsHttpEndpoint": {
+    "url": "https://ipfs.io"
+  },
+  "ipfsRpcEndpoint": {
+    "url": "<YOUR_IPFS_RPC_URL>",
+    "username": "<YOUR_IPFS_USERNAME>"
+  },
+  "vlayerEndpoint": {
+    "url": "https://web-prover.vlayer.xyz/api/v1/verify",
+    "clientId": "<YOUR_VLAYER_CLIENT_ID>"
+  },
+  "verifier": {
+    "name": "<YOUR_VERIFIER_NAME>",
+    "publicKey": "<YOUR_VERIFIER_PUBLIC_KEY>"
+  }
+}

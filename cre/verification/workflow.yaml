@@ -1,0 +1,14 @@
+# ==========================================================================
+# CRE WORKFLOW SETTINGS FILE
+# ==========================================================================
+# Rename the target to match your CRE project settings (project.yaml).
+# Update config-path to point to your config JSON file.
+
+# ==========================================================================
+save-verifier:
+  user-workflow:
+    workflow-name: "save_verification"
+  workflow-artifacts:
+    workflow-path: "./main.ts"
+    config-path: "./config.template.json"
+    secrets-path: "../secrets.yaml"
