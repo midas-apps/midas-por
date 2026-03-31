@@ -10,16 +10,16 @@
     "postinstall": "bun run setup && (bun run build:save || echo 'Warning: @save/core build failed, run bun run build:save manually')"
   },
   "dependencies": {
-    "@chainlink/cre-sdk": "^1.0.9",
+    "@chainlink/cre-sdk": "1.0.9",
     "@save/core": "git+ssh://git@github.com:llama-risk/save.git#v0.1.0",
-    "@noble/hashes": "^1.6.1",
-    "pako": "^2.1.0",
+    "@noble/hashes": "1.6.1",
+    "pako": "2.1.0",
     "viem": "2.34.0",
     "zod": "3.25.76"
   },
   "devDependencies": {
     "@types/bun": "1.2.21",
-    "@types/pako": "^2.0.3",
-    "typescript": "^5.7.2"
+    "@types/pako": "2.0.3",
+    "typescript": "5.7.2"
   }
 }
