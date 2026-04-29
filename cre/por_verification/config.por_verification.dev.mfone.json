@@ -1,0 +1,48 @@
+{
+  "name": "midas_nav_por_verification_mfone_dev",
+  "attestationSetLogTrigger": {
+    "chainSelectorName": "ethereum-testnet-sepolia",
+    "address": "0x4AbE1936AEc4aAC8177eC65e437A1f8726Bc7F10",
+    "topics": [
+      {
+        "values": ["0x9e49776c5287164e09f584ffc1d95620421d3193b4e4b6a88bee160aedbc7b5b"]
+      },
+      {
+        "values": ["0x9701c16c2aa2589b3fef161e3d13f4b38a9e0c8ad4b827bff12cf65a6a3ef234"]
+      },
+      {
+        "values": []
+      }
+    ],
+    "confidence": "latest"
+  },
+  "httpTrigger": {
+    "authorizedKeys": [
+      {
+        "type": "KEY_TYPE_ECDSA_EVM",
+        "publicKey": "<YOUR_AUTHORIZED_KEY_ADDRESS>"
+      }
+    ]
+  },
+  "verifierProxy": {
+    "address": "<YOUR_VERIFIER_PROXY_ADDRESS>",
+    "gasLimit": "1000000",
+    "readConfidence": "latest"
+  },
+  "ipfsHttpEndpoint": {
+    "url": "https://ipfs.io"
+  },
+  "ipfsRpcEndpoint": {
+    "url": "<YOUR_IPFS_RPC_URL>",
+    "username": "<YOUR_IPFS_USERNAME>"
+  },
+  "verifier": {
+    "name": "Midas Verifier",
+    "publicKey": "<YOUR_VERIFIER_PUBLIC_KEY>"
+  },
+  "hasOffchainData": true,
+  "vlayerEndpoint": {
+    "url": "https://web-prover.vlayer.xyz/api/v1/verify",
+    "clientId": "<YOUR_VLAYER_CLIENT_ID>"
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "name": "midas_nav_por_attestation_mfone_dev",
+  "newClaimLogTrigger": {
+    "chainSelectorName": "ethereum-testnet-sepolia",
+    "address": "0x4AbE1936AEc4aAC8177eC65e437A1f8726Bc7F10",
+    "topics": [
+      {
+        "values": [
+          "0x72b189dd90d0f37602e786b240689da1e2575b2e48c418dcf9f6ae1a4ca7b501"
+        ]
+      },
+      {
+        "values": [
+          "0x9701c16c2aa2589b3fef161e3d13f4b38a9e0c8ad4b827bff12cf65a6a3ef234"
+        ]
+      },
+      {
+        "values": []
+      },
+      {
+        "values": [
+          "0xcecc8202c7e9b8654414c0de09657c531f6ece617258c3682ac4317cbf462120"
+        ]
+      }
+    ],
+    "confidence": "latest"
+  },
+  "httpTrigger": {
+    "authorizedKeys": [
+      {
+        "type": "KEY_TYPE_ECDSA_EVM",
+        "publicKey": "<YOUR_AUTHORIZED_KEY_ADDRESS>"
+      }
+    ]
+  },
+  "attesterProxy": {
+    "address": "<YOUR_ATTESTER_PROXY_ADDRESS>",
+    "gasLimit": "1000000",
+    "readConfidence": "latest"
+  },
+  "ipfsHttpEndpoint": {
+    "url": "https://ipfs.io"
+  },
+  "ipfsRpcEndpoint": {
+    "url": "<YOUR_IPFS_RPC_URL>",
+    "username": "<YOUR_IPFS_USERNAME>"
+  },
+  "attester": {
+    "publicKey": "<YOUR_ATTESTER_PUBLIC_KEY>"
+  },
+  "overcollateralizationThreshold": 0.995,
+  "fundManager": {
+    "expectedEmail": "<FUND_MANAGER_EMAIL>",
+    "requiredReceiverEmail": "midas@vlayer.xyz",
+    "allowedReceiverEmails": [],
+    "tokenName": "mFONE"
+  },
+  "oneTokenApi": {
+    "tokenName": "mFONE"
+  }
+}

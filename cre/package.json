@@ -4,8 +4,8 @@
   "dependencies": {
     "@chainlink/cre-sdk": "1.0.9",
     "@noble/hashes": "1.6.1",
-    "save-attestation-workflow": "./attestation",
-    "save-verification-workflow": "./verification",
+    "por-attestation-workflow": "./por_attestation",
+    "por-verification-workflow": "./por_verification",
     "pako": "2.1.0",
     "viem": "2.34.0",
     "zod": "3.25.76"

@@ -1,0 +1,56 @@
+{
+  "name": "midas_por_verification_dev",
+  "attestationSetLogTrigger": {
+    "chainSelectorName": "ethereum-testnet-sepolia",
+    "address": "0x4AbE1936AEc4aAC8177eC65e437A1f8726Bc7F10",
+    "topics": [
+      {
+        "values": ["0x9e49776c5287164e09f584ffc1d95620421d3193b4e4b6a88bee160aedbc7b5b"]
+      },
+      {
+        "values": []
+      },
+      {
+        "values": []
+      }
+    ],
+    "confidence": "latest"
+  },
+  "httpTrigger": {
+    "authorizedKeys": [
+      {
+        "type": "KEY_TYPE_ECDSA_EVM",
+        "publicKey": "0x9118964074e2AA11393ce0797264759dB2F2ef69"
+      }
+    ]
+  },
+  "verifierProxy": {
+    "address": "0x2D61a2a3d95ec455Bcf58B439ee1cF1904fD3fF9",
+    "gasLimit": "1000000",
+    "readConfidence": "latest"
+  },
+  "ipfsHttpEndpoint": {
+    "url": "https://gateway.pinata.cloud"
+  },
+  "ipfsPinataEndpoint": {
+    "url": "https://api.pinata.cloud",
+  },
+  "verifier": {
+    "name": "Midas Verifier",
+    "publicKey": "0x036ff44311df70aa07597ea86e472ab2f0fbc4111b4a5dc143c318f6513a0f2d8d"
+  },
+  "tokens": {
+    "0x9701c16c2aa2589b3fef161e3d13f4b38a9e0c8ad4b827bff12cf65a6a3ef234": {
+      "name": "mFONE",
+      "hasOffchainData": true,
+      "vlayerEndpoint": {
+        "url": "https://web-prover.vlayer.xyz/api/v1/verify",
+        "clientId": "<YOUR_VLAYER_CLIENT_ID>"
+      }
+    },
+    "0xf77ebd862996bb55a1c85ab27e4c554e0e77f691d74e8b63bf4849007db4cbc9": {
+      "name": "mHyperBTC",
+      "hasOffchainData": false
+    }
+  }
+}

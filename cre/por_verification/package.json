@@ -1,0 +1,25 @@
+{
+  "name": "nav-por-verification-workflow",
+  "version": "1.0.0",
+  "main": "dist/main.js",
+  "private": true,
+  "license": "BUSL-1.1",
+  "scripts": {
+    "setup": "bun x cre-setup",
+    "build:save": "cd node_modules/@save/core && bun install && bun run build",
+    "postinstall": "bun run setup && (bun run build:save || echo 'Warning: @save/core build failed, run bun run build:save manually')"
+  },
+  "dependencies": {
+    "@chainlink/cre-sdk": "1.0.9",
+    "@save/core": "file:/Users/emericmidas/Documents/RD/midas-ae-main/attestation-engine-apps/midas-nav-consulting/cre/nav_consulting_attestation/node_modules/@save/core",
+    "@noble/hashes": "1.6.1",
+    "pako": "2.1.0",
+    "viem": "2.34.0",
+    "zod": "3.25.76"
+  },
+  "devDependencies": {
+    "@types/bun": "1.2.21",
+    "@types/pako": "2.0.3",
+    "typescript": "5.7.2"
+  }
+}

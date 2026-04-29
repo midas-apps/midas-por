@@ -1,0 +1,44 @@
+{
+  "name": "midas_nav_por_verification_mhyperbtc_dev",
+  "attestationSetLogTrigger": {
+    "chainSelectorName": "ethereum-testnet-sepolia",
+    "address": "0x4AbE1936AEc4aAC8177eC65e437A1f8726Bc7F10",
+    "topics": [
+      {
+        "values": ["0x9e49776c5287164e09f584ffc1d95620421d3193b4e4b6a88bee160aedbc7b5b"]
+      },
+      {
+        "values": ["0xf77ebd862996bb55a1c85ab27e4c554e0e77f691d74e8b63bf4849007db4cbc9"]
+      },
+      {
+        "values": []
+      }
+    ],
+    "confidence": "latest"
+  },
+  "httpTrigger": {
+    "authorizedKeys": [
+      {
+        "type": "KEY_TYPE_ECDSA_EVM",
+        "publicKey": "<YOUR_AUTHORIZED_KEY_ADDRESS>"
+      }
+    ]
+  },
+  "verifierProxy": {
+    "address": "<YOUR_VERIFIER_PROXY_ADDRESS>",
+    "gasLimit": "1000000",
+    "readConfidence": "latest"
+  },
+  "ipfsHttpEndpoint": {
+    "url": "https://ipfs.io"
+  },
+  "ipfsRpcEndpoint": {
+    "url": "<YOUR_IPFS_RPC_URL>",
+    "username": "<YOUR_IPFS_USERNAME>"
+  },
+  "verifier": {
+    "name": "Midas Verifier",
+    "publicKey": "<YOUR_VERIFIER_PUBLIC_KEY>"
+  },
+  "hasOffchainData": false
+}

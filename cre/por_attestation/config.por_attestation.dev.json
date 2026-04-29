@@ -1,0 +1,95 @@
+{
+  "name": "midas_por_attestation_dev",
+  "newClaimLogTrigger": {
+    "chainSelectorName": "ethereum-testnet-sepolia",
+    "address": "0x4AbE1936AEc4aAC8177eC65e437A1f8726Bc7F10",
+    "topics": [
+      {
+        "values": [
+          "0x72b189dd90d0f37602e786b240689da1e2575b2e48c418dcf9f6ae1a4ca7b501"
+        ]
+      },
+      {
+        "values": []
+      },
+      {
+        "values": []
+      },
+      {
+        "values": [
+          "0xcecc8202c7e9b8654414c0de09657c531f6ece617258c3682ac4317cbf462120"
+        ]
+      }
+    ],
+    "confidence": "latest"
+  },
+  "httpTrigger": {
+    "authorizedKeys": [
+      {
+        "type": "KEY_TYPE_ECDSA_EVM",
+        "publicKey": "0x9118964074e2AA11393ce0797264759dB2F2ef69"
+      }
+    ]
+  },
+  "attesterProxy": {
+    "address": "0x2D61a2a3d95ec455Bcf58B439ee1cF1904fD3fF9",
+    "gasLimit": "1000000",
+    "readConfidence": "latest"
+  },
+  "ipfsHttpEndpoint": {
+    "url": "https://gateway.pinata.cloud"
+  },
+  "ipfsPinataEndpoint": {
+    "url": "https://api.pinata.cloud",
+  },
+  "attester": {
+    "publicKey": "0x036ff44311df70aa07597ea86e472ab2f0fbc4111b4a5dc143c318f6513a0f2d8d"
+  },
+  "overcollateralizationThreshold": 0.995,
+  "tokens": {
+    "0x9701c16c2aa2589b3fef161e3d13f4b38a9e0c8ad4b827bff12cf65a6a3ef234": {
+      "name": "mFONE",
+      "fundManager": {
+        "expectedEmail": "@fasanara.com",
+        "requiredReceiverEmail": "midas@vlayer.xyz",
+        "allowedReceiverEmails": [
+          "antoine@midas.app",
+          "maryjane@midas.app",
+          "terome@midas.app",
+          "sheryll@midas.app",
+          "emeric@midas.app",
+          "lisa@midas.app",
+          "mfone@eo.app"
+        ],
+        "tokenName": "mFONE"
+      },
+      "oneTokenApi": {
+        "tokenName": "mFONE"
+      },
+      "onchainAssets": {
+        "mtbillWallets": [
+          "0x4dc293e0d6BEfe6FCF9d1FFDEaA5266BD15C3071"
+        ],
+        "mtbillTokenAddress": "0xDD629E5241CbC5919847783e6C96B2De4754e438",
+        "mtbillTokenDecimals": 18,
+        "mtbillOracleAddress": "0x056339C044055819E8Db84E71f5f2E1F536b2E5b",
+        "mtbillOracleDecimals": 8,
+        "usdcWallets": [
+          "0x86B16681E21E857A9a71a8FDfC33AB1eB8213b74",
+          "0x4dc293e0d6BEfe6FCF9d1FFDEaA5266BD15C3071",
+          "0xbB273918FE8c9AFac4b6f16Eb8C984DD99b2f407"
+        ],
+        "usdcTokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+        "usdcTokenDecimals": 6,
+        "chainSelectorName": "ethereum-mainnet"
+      }
+    },
+    "0xf77ebd862996bb55a1c85ab27e4c554e0e77f691d74e8b63bf4849007db4cbc9": {
+      "name": "mHyperBTC",
+      "oneTokenApi": {
+        "tokenName": "mHyperBTC",
+        "useNavBase": true
+      }
+    }
+  }
+}

@@ -1,2 +1,8 @@
 .DS_Store
 .env
+node_modules/
+.cre_build_tmp.js
+*.prod.json
+cre/.env.dev
+cre/.env.prod
+frontend/
