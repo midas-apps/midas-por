@@ -37,8 +37,12 @@
     "username": "<YOUR_IPFS_USERNAME>"
   },
   "verifier": {
-    "name": "Midas Verifier",
+    "name": "<YOUR_VERIFIER_NAME>",
     "publicKey": "<YOUR_VERIFIER_PUBLIC_KEY>"
   },
-  "hasOffchainData": false
+  "tokens": {
+    "0xf77ebd862996bb55a1c85ab27e4c554e0e77f691d74e8b63bf4849007db4cbc9": {
+      "name": "mHyperBTC"
+    }
+  }
 }

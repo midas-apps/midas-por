@@ -37,16 +37,9 @@ const httpTriggerConfigSchema = z
 /**
  * Per-token verification config — keyed by proofId (lowercase bytes32 hex)
  */
-const tokenVerificationConfigSchema = z
-	.object({
-		name: z.string(),
-		hasOffchainData: z.boolean().default(false),
-		vlayerEndpoint: vlayerEndpointSchema.optional(),
-	})
-	.refine((d) => !d.hasOffchainData || d.vlayerEndpoint != null, {
-		message: 'vlayerEndpoint required when hasOffchainData is true',
-		path: ['vlayerEndpoint'],
-	})
+const tokenVerificationConfigSchema = z.object({
+	name: z.string(),
+})
 
 export type TokenVerificationConfig = z.infer<typeof tokenVerificationConfigSchema>
 
@@ -63,8 +56,7 @@ export const configSchema = z
 		ipfsRpcEndpoint: ipfsRpcEndpointSchema.optional(),
 		ipfsPinataEndpoint: ipfsPinataEndpointSchema.optional(),
 		verifier: verifierConfigSchema,
-		// Token registry — keyed by proofId (lowercase bytes32 hex)
-		// To add a new token: add an entry here and run `cre workflow update-config`
+		vlayerEndpoint: vlayerEndpointSchema.optional(),
 		tokens: z.record(z.string(), tokenVerificationConfigSchema),
 	})
 	.refine((d) => d.name.trim().length > 0, { message: 'Name cannot be empty', path: ['name'] })

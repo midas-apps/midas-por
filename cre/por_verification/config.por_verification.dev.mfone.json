@@ -37,12 +37,16 @@
     "username": "<YOUR_IPFS_USERNAME>"
   },
   "verifier": {
-    "name": "Midas Verifier",
+    "name": "<YOUR_VERIFIER_NAME>",
     "publicKey": "<YOUR_VERIFIER_PUBLIC_KEY>"
   },
-  "hasOffchainData": true,
   "vlayerEndpoint": {
     "url": "https://web-prover.vlayer.xyz/api/v1/verify",
     "clientId": "<YOUR_VLAYER_CLIENT_ID>"
+  },
+  "tokens": {
+    "0x9701c16c2aa2589b3fef161e3d13f4b38a9e0c8ad4b827bff12cf65a6a3ef234": {
+      "name": "mFONE"
+    }
   }
 }

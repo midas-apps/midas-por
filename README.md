@@ -33,36 +33,11 @@ proofIds are computed as `sha256(proofName)` (SHA-256, not keccak256).
 
 ## Overcollateralization
 
-Before pushing any attestation, the workflow verifies the token is overcollateralized. Two methods are tried in order — if both fail, no attestation is pushed.
-
-### Method 1 — External data (preferred)
-
-Independently verifies the fund backing using external sources only. Formula varies by token type:
-
-**Tokens with fund manager email (e.g. mFONE):**
-```
-(fasanaraNavUSD + 1token_onchain_AUM) / supply / oracle_price > threshold
-```
-- `fasanaraNavUSD` = `totalNotional + netAccruedInterest` from Vlayer TLS-notarised Fasanara email
-- `1token_onchain_AUM` = `equity.total × 1e6` from 1token API (on-chain assets only)
-- Together they reconstruct the full portfolio: Fasanara off-chain (~90%) + on-chain USDC (~10%)
-
-**Tokens without fund manager (e.g. mHyperBTC):**
-```
-pv_base.total / supply / oracle_price > threshold
-```
-- `pv_base.total` = total portfolio in base currency (BTC for mHyperBTC) from 1token API
-- `oracle_price` = token price in the same base currency from Chainlink oracle
-
-### Method 2 — Internal fallback (ops NAV)
-
-```
-navReportedByOps / totalSupplyCrossChainReportedByOps / oracle_price > threshold
-```
+Before pushing any attestation, the workflow verifies the token is overcollateralized using external data sources. If the check fails, an internal fallback using ops-reported NAV is tried. If both fail, no attestation is pushed.
 
 Default threshold: `0.995`
 
-> **Pending**: Method 1 currently uses `totalSupplyCrossChainReportedByOps` as supply denominator. A cross-chain supply API endpoint is planned to replace this — see Future improvements.
+> **Pending**: supply denominator currently uses `totalSupplyCrossChainReportedByOps` (ops-reported). A cross-chain supply API is planned to replace this — see Future improvements.
 
 ---
 

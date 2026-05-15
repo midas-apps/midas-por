@@ -264,11 +264,13 @@ const runWorkflow = async (
 			httpClient: new CreHttpClient(runtime),
 		}
 
-		// Vlayer credentials only needed for tokens with off-chain data
-		if (tokenConfig.hasOffchainData && tokenConfig.vlayerEndpoint) {
+		const hasVlayerClaim = Array.isArray(attestationData?.claims) &&
+			attestationData.claims.some((c: any) => c.id === 'fund_manager_claim')
+
+		if (hasVlayerClaim && runtime.config.vlayerEndpoint) {
 			const vlayerAuthToken = runtime.getSecret({ id: 'vlayerauthtoken' }).result().value as string
 			verificationOptions.vlayerCredentials = {
-				clientId: tokenConfig.vlayerEndpoint.clientId,
+				clientId: runtime.config.vlayerEndpoint.clientId,
 				authToken: vlayerAuthToken,
 			}
 		}
