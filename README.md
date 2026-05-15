@@ -6,10 +6,10 @@ Chainlink CRE workflows for the SAVE Proof of Reserves framework. Implements NAV
 
 ### Attestation (`cre/por_attestation/`)
 
-Listens for `NewClaim` events (ops claim type) on the SaveRegistryWithClaim contract. Fetches the ops claim from IPFS, reads on-chain oracle price and token supply, optionally verifies the fund manager email via Vlayer TLS Notary, runs the overcollateralization check, builds a signed SAVE attestation, and pushes it on-chain.
+Listens for `NewClaim` events (ops claim type) on the SaveRegistryWithClaim contract. Fetches the ops claim from IPFS, reads on-chain oracle price, optionally verifies the fund manager email via Vlayer TLS Notary, runs the overcollateralization check, builds a signed SAVE attestation, and pushes it on-chain.
 
 **Flow:**
-`NewClaim` event → Fetch ops claim from IPFS → Read oracle price (Chainlink) → Read on-chain supply → [Vlayer TLS verification] → Fetch 1token report → Overcollateralization check → Build & sign attestation → Upload to IPFS → `setAttestation` on-chain
+`NewClaim` event → Fetch ops claim from IPFS → Read oracle price (Chainlink) → [Vlayer TLS verification] → Fetch 1token report → Overcollateralization check → Build & sign attestation → Upload to IPFS → `setAttestation` on-chain
 
 ### Verification (`cre/por_verification/`)
 
@@ -37,16 +37,32 @@ Before pushing any attestation, the workflow verifies the token is overcollatera
 
 ### Method 1 — External data (preferred)
 
-**Primary**: `1token equity.total × 1e6 / totalSupplyTokens / oraclePrice > threshold`
+Independently verifies the fund backing using external sources only. Formula varies by token type:
 
-**Fallback within Method 1** (tokens with `onchainAssets` config):
-`(fasanaraNavUSD + mtbillValueUSD + usdcValueUSD) / totalSupplyTokens / oraclePrice > threshold`
+**Tokens with fund manager email (e.g. mFONE):**
+```
+(fasanaraNavUSD + 1token_onchain_AUM) / supply / oracle_price > threshold
+```
+- `fasanaraNavUSD` = `totalNotional + netAccruedInterest` from Vlayer TLS-notarised Fasanara email
+- `1token_onchain_AUM` = `equity.total × 1e6` from 1token API (on-chain assets only)
+- Together they reconstruct the full portfolio: Fasanara off-chain (~90%) + on-chain USDC (~10%)
+
+**Tokens without fund manager (e.g. mHyperBTC):**
+```
+pv_base.total / supply / oracle_price > threshold
+```
+- `pv_base.total` = total portfolio in base currency (BTC for mHyperBTC) from 1token API
+- `oracle_price` = token price in the same base currency from Chainlink oracle
 
 ### Method 2 — Internal fallback (ops NAV)
 
-`navReportedByOps / totalSupplyCrossChainReportedByOps / oraclePrice > threshold`
+```
+navReportedByOps / totalSupplyCrossChainReportedByOps / oracle_price > threshold
+```
 
 Default threshold: `0.995`
+
+> **Pending**: Method 1 currently uses `totalSupplyCrossChainReportedByOps` as supply denominator. A cross-chain supply API endpoint is planned to replace this — see Future improvements.
 
 ---
 
@@ -92,8 +108,8 @@ bun install
 
 Create your environment files (gitignored):
 ```bash
-cp cre/.env.example cre/.env.dev   # dev/Sepolia — old deployer wallet
-cp cre/.env.example cre/.env.prod  # prod/mainnet — new deployer wallet
+cp cre/.env.example cre/.env.dev
+cp cre/.env.example cre/.env.prod
 # Fill in your values
 ```
 
@@ -105,30 +121,30 @@ Prod config files (`*.prod.json`) are gitignored — create them locally from th
 
 ## Deploy
 
-From the `cre/` directory:
+From the `cre/` directory (use absolute paths for `--config`):
 
 ```bash
 # Dev (Sepolia)
 cre workflow deploy ./por_attestation \
-  --config /path/to/config.por_attestation.dev.json \
+  --config /absolute/path/to/config.por_attestation.dev.json \
   --target por-attester-dev \
-  -R . --env .env.dev --yes
+  -R . --env .env.dev
 
 cre workflow deploy ./por_verification \
-  --config /path/to/config.por_verification.dev.json \
+  --config /absolute/path/to/config.por_verification.dev.json \
   --target por-verifier-dev \
-  -R . --env .env.dev --yes
+  -R . --env .env.dev
 
 # Prod (Mainnet)
 cre workflow deploy ./por_attestation \
-  --config /path/to/config.por_attestation.prod.json \
+  --config /absolute/path/to/config.por_attestation.prod.json \
   --target por-attester-prod \
-  -R . --env .env.prod --yes
+  -R . --env .env.prod
 
 cre workflow deploy ./por_verification \
-  --config /path/to/config.por_verification.prod.json \
+  --config /absolute/path/to/config.por_verification.prod.json \
   --target por-verifier-prod \
-  -R . --env .env.prod --yes
+  -R . --env .env.prod
 ```
 
 ---
@@ -141,6 +157,8 @@ Defined in `cre/.env.dev` / `cre/.env.prod` (gitignored). See `cre/.env.example`
 |---|---|---|---|
 | `CRE_ETH_PRIVATE_KEY` | — | CLI only | Ethereum key for CRE CLI deploy operations |
 | `PINATA_JWT` | `pinatajwt` | Both | Pinata JWT for IPFS pinning |
+| `ATTESTATION_PINATA_GROUP` | `attestationpinatagroupid` | Attestation | Optional Pinata group ID for attestation uploads |
+| `VERIFICATION_PINATA_GROUP` | `verificationpinatagroupid` | Verification | Optional Pinata group ID for verification uploads |
 | `VLAYER_AUTH_TOKEN` | `vlayerauthtoken` | Both | Vlayer API authentication token |
 | `ATTESTER_PRIVATE_KEY` | `attesterprivatekey` | Attestation | Key for signing SAVE attestation documents |
 | `VERIFIER_PRIVATE_KEY` | `verifierprivatekey` | Verification | Key for signing SAVE verification documents |
@@ -153,10 +171,31 @@ Defined in `cre/.env.dev` / `cre/.env.prod` (gitignored). See `cre/.env.example`
 Each workflow has a JSON config file per environment. Key fields:
 
 - `attester.publicKey` / `verifier.publicKey` — full ECDSA public key (65 bytes, `0x04...`) of the signing wallet
-- `ipfsPinataEndpoint.groupId` — optional Pinata group ID to organize uploaded files
 - `tokens` — registry of supported tokens, keyed by proofId
 
 To add a new token: add an entry to `tokens` in the config and redeploy.
+
+### Token config fields
+
+| Field | Required | Description |
+|---|---|---|
+| `name` | Yes | Token name (used in filenames and logs) |
+| `oneTokenApi.tokenName` | Yes | Token name as used in the 1token API |
+| `oneTokenApi.useNavBase` | No | Use `pv_base.total` (base currency) instead of `equity.total × 1e6` (USD) |
+| `fundManager` | No | Vlayer TLS email config — enables offchain NAV verification |
+| `supplyToken` | No | On-chain token address for `onchain_supply` claim |
+
+---
+
+## Attester public key
+
+Attestations are signed by the attester wallet. The public key is embedded in each attestation along with a `publicKeySource` URL pointing to:
+
+```
+https://midas.app/.well-known/save-keys.json
+```
+
+This file should list the attester public key so that anyone can independently verify attestation signatures without contacting Midas.
 
 ---
 
@@ -198,34 +237,6 @@ Constructor parameters:
 | Mainnet | [`0x2D6e9F608807436DE5D9603B00Abe3FEd1Bc809d`](https://etherscan.io/address/0x2D6e9F608807436DE5D9603B00Abe3FEd1Bc809d) |
 | Sepolia | [`0x4AbE1936AEc4aAC8177eC65e437A1f8726Bc7F10`](https://sepolia.etherscan.io/address/0x4AbE1936AEc4aAC8177eC65e437A1f8726Bc7F10) |
 
-## Future improvements
-
-### Config-driven email parser
-
-Currently `extractFasanaraNavFromEmail` is hardcoded to Fasanara's plain-text email format (looks for `Total Notional Amount` + `Net Accrued Interest`). Supporting a new fund manager requires a code change and workflow redeploy.
-
-**Planned improvement**: make the parser fully config-driven via `fundManager.emailParser` in the token config. Each field to extract is specified by a regex + sign (add/subtract), so NAV = sum of matched fields. Example:
-
-```json
-"fundManager": {
-  "expectedEmail": "@fasanara.com",
-  "requiredReceiverEmail": "midas@vlayer.xyz",
-  "tokenName": "mFONE",
-  "emailParser": {
-    "navFields": [
-      { "regex": "total\\s+notional\\s+amount", "sign": 1 },
-      { "regex": "net\\s+accrued\\s+interest", "sign": 1 }
-    ]
-  }
-}
-```
-
-With this, adding a new fund manager = update config only, no redeploy. The fund manager email format can be standardized freely.
-
-### Cross-chain supply API
-
-Currently `totalSupplyCrossChainReportedByOps` is manually reported by the ops team in the ops claim. A backend API endpoint (`/api/data/supply/total/address/{address}`) is planned to replace this in Method 1 — the workflow will fetch the cross-chain supply directly, removing the manual step. Method 2 (internal fallback) will continue to use the ops-reported value.
-
 ---
 
 ## Reading on-chain data
@@ -252,3 +263,15 @@ async function fetchFromIpfs(cid) {
   return JSON.parse(await new Response(decompressed).text())
 }
 ```
+
+---
+
+## Future improvements
+
+### Cross-chain supply API
+
+Currently Method 1 uses `totalSupplyCrossChainReportedByOps` (ops-reported) as the supply denominator. A Midas supply explorer API endpoint is planned to replace this — the workflow will fetch the cross-chain supply at the oracle update timestamp directly, making Method 1 fully independent of ops data. Method 2 will continue to use the ops-reported value.
+
+### Config-driven email parser
+
+Currently `extractFasanaraNavFromEmail` is hardcoded to Fasanara's email format (`Total Notional Amount` + `Net Accrued Interest`). Supporting a new fund manager requires a code change and redeploy. A config-driven parser via `fundManager.emailParser` is planned so adding a new fund manager only requires a config update.

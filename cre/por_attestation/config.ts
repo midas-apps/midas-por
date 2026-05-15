@@ -45,19 +45,6 @@ const oneTokenApiSchema = z.object({
 	useNavBase: z.boolean().default(false),
 })
 
-const onchainAssetsSchema = z.object({
-	mtbillWallets: z.array(z.string().regex(/^0x[a-fA-F0-9]{40}$/)),
-	mtbillTokenAddress: z.string().regex(/^0x[a-fA-F0-9]{40}$/),
-	mtbillTokenDecimals: z.number().default(18),
-	mtbillOracleAddress: z.string().regex(/^0x[a-fA-F0-9]{40}$/),
-	mtbillOracleDecimals: z.number().default(8),
-	usdcWallets: z.array(z.string().regex(/^0x[a-fA-F0-9]{40}$/)),
-	usdcTokenAddress: z.string().regex(/^0x[a-fA-F0-9]{40}$/),
-	usdcTokenDecimals: z.number().default(6),
-	chainSelectorName: z.string().default('ethereum-mainnet'),
-})
-export type OnchainAssetsConfig = z.infer<typeof onchainAssetsSchema>
-
 
 const ipfsPinataEndpointSchema = z
 	.object({ url: z.string() })
@@ -86,7 +73,6 @@ const tokenConfigSchema = z.object({
 	name: z.string(),
 	fundManager: fundManagerConfigSchema.optional(),
 	oneTokenApi: oneTokenApiSchema.optional(),
-	onchainAssets: onchainAssetsSchema.optional(),
 	supplyToken: supplyTokenSchema.optional(),
 })
 

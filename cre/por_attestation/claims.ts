@@ -120,33 +120,42 @@ export function createInternalOvercollateralizationClaim(
  */
 export function createExternalOvercollateralizationClaim(
 	oneTokenEquityTotal: number,
+	fasanaraNavUSD: number | null,
 	opsClaimData: OpsClaimData,
 	oraclePriceData: OraclePriceData,
 	threshold: number,
 ): ObjectClaim {
-	const oneTokenAUM = oneTokenEquityTotal * 1_000_000
+	const oneTokenOnchainAUM = oneTokenEquityTotal * 1_000_000
+	const fasanara = fasanaraNavUSD ?? 0
+	const totalAUM = oneTokenOnchainAUM + fasanara
 	const totalSupplyTokens = Number(BigInt(opsClaimData.totalSupplyCrossChainReportedByOps)) / 1e18
-	const navPerToken = totalSupplyTokens > 0 ? oneTokenAUM / totalSupplyTokens : 0
+	const navPerToken = totalSupplyTokens > 0 ? totalAUM / totalSupplyTokens : 0
 	const oraclePriceUSD = Number(oraclePriceData.answer) / Math.pow(10, oraclePriceData.decimals)
 	const ratio = oraclePriceUSD > 0 ? navPerToken / oraclePriceUSD : 0
+
+	const data: Record<string, unknown> = {
+		overcollateralizationType: 'method-1',
+		aumSource: fasanara > 0 ? '1token+fasanara_vlayer' : '1token',
+		supplySource: 'ops_claim',
+		oneTokenAUM: totalAUM.toFixed(2),
+		totalSupplyCrossChainReportedByOps: opsClaimData.totalSupplyCrossChainReportedByOps,
+		totalSupplyTokens: totalSupplyTokens.toFixed(6),
+		navPerToken: navPerToken.toFixed(6),
+		oraclePriceFormatted: oraclePriceUSD.toFixed(9),
+		threshold,
+		ratio: parseFloat(ratio.toFixed(6)),
+		passed: ratio > threshold,
+	}
+	if (fasanara > 0) {
+		data.oneTokenOnchainAUM = oneTokenOnchainAUM.toFixed(2)
+		data.fasanaraNavUSD = fasanara.toFixed(2)
+	}
 
 	return new ObjectClaim({
 		id: 'overcollateralization',
 		format: 'json',
-		data: {
-			overcollateralizationType: 'method-1',
-			aumSource: '1token',
-			supplySource: 'ops_claim',
-			oneTokenAUM: oneTokenAUM.toFixed(2),
-			totalSupplyCrossChainReportedByOps: opsClaimData.totalSupplyCrossChainReportedByOps,
-			totalSupplyTokens: totalSupplyTokens.toFixed(6),
-			navPerToken: navPerToken.toFixed(6),
-			oraclePriceFormatted: oraclePriceUSD.toFixed(9),
-			threshold,
-			ratio: parseFloat(ratio.toFixed(6)),
-			passed: ratio > threshold,
-		},
-		description: 'Overcollateralization check using external AUM data (1token)',
+		data,
+		description: 'Overcollateralization check using external AUM data (1token + Fasanara Vlayer)',
 		proof: CRE_CONSENSUS_PROOF,
 	})
 }
@@ -164,46 +173,6 @@ export function createOvercollateralizationRatioClaim(): NumericClaim {
 	})
 }
 
-/**
- * Create overcollateralization claim using offchain (Fasanara email) + on-chain assets (level 2).
- * totalVerifiedAUM = fasanaraNavUSD + onchainData.mtbillValueUSD + onchainData.usdcValueUSD
- */
-export function createOffchainOnchainOvercollateralizationClaim(
-	onchainData: OnchainAssetsData,
-	fasanaraNavUSD: number,
-	opsClaimData: OpsClaimData,
-	oraclePriceData: OraclePriceData,
-	threshold: number,
-): ObjectClaim {
-	const totalVerifiedAUM = fasanaraNavUSD + onchainData.mtbillValueUSD + onchainData.usdcValueUSD
-	const totalSupplyTokens = Number(BigInt(opsClaimData.totalSupplyCrossChainReportedByOps)) / 1e18
-	const navPerToken = totalSupplyTokens > 0 ? totalVerifiedAUM / totalSupplyTokens : 0
-	const oraclePriceUSD = Number(oraclePriceData.answer) / Math.pow(10, oraclePriceData.decimals)
-	const ratio = oraclePriceUSD > 0 ? navPerToken / oraclePriceUSD : 0
-
-	return new ObjectClaim({
-		id: 'overcollateralization',
-		format: 'json',
-		data: {
-			overcollateralizationType: 'method-1',
-			aumSource: 'fasanara_vlayer+mtbill_onchain+usdc_onchain',
-			supplySource: 'ops_claim',
-			fasanaraNavUSD: fasanaraNavUSD.toFixed(2),
-			mtbillValueUSD: onchainData.mtbillValueUSD.toFixed(2),
-			usdcValueUSD: onchainData.usdcValueUSD.toFixed(2),
-			totalVerifiedAUM: totalVerifiedAUM.toFixed(2),
-			totalSupplyCrossChainReportedByOps: opsClaimData.totalSupplyCrossChainReportedByOps,
-			totalSupplyTokens: totalSupplyTokens.toFixed(6),
-			navPerToken: navPerToken.toFixed(6),
-			oraclePriceFormatted: oraclePriceUSD.toFixed(9),
-			threshold,
-			ratio: parseFloat(ratio.toFixed(6)),
-			passed: ratio > threshold,
-		},
-		description: 'Overcollateralization check using Fasanara email + on-chain assets (mTBILL + USDC)',
-		proof: CRE_CONSENSUS_PROOF,
-	})
-}
 
 /**
  * Create fund manager email object claim with verified Vlayer TLS data

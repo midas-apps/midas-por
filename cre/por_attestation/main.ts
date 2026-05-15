@@ -18,8 +18,8 @@ import { decodeAbiParameters, encodeFunctionData, decodeFunctionResult, zeroAddr
 import { SaveRegistryWithClaim } from '../contracts/abi/SaveRegistryWithClaim.js'
 import { configSchema, type Config, type TokenConfig, getNetworkByChainSelector } from './config.js'
 import { CRE_CONFIDENCE_MAP, getBlockNumberByConfidence } from '../library/config-schemas.js'
-import { verifyClaimWithVlayer, readOraclePrice, fetchOneTokenReport, fetchSupplyDetails, extractFasanaraNavFromEmail, readOnchainAssets, readOnchainTotalSupply } from './api.js'
-import type { OneTokenReportData, OnchainAssetsData, OnchainSupplyData } from './api.js'
+import { verifyClaimWithVlayer, readOraclePrice, fetchOneTokenReport, fetchSupplyDetails, extractFasanaraNavFromEmail, readOnchainTotalSupply } from './api.js'
+import type { OneTokenReportData, OnchainSupplyData } from './api.js'
 import { hashToIPFSCid, ipfsCidToHash } from '../library/utils.js'
 import { fetchFromIpfs, pushToIpfsPinata, compressJson, decompressJson } from '../library/ipfs.js'
 import { AttestationBuilder } from '@save/core'
@@ -30,7 +30,6 @@ import {
 	createOraclePriceNumericClaim,
 	createInternalOvercollateralizationClaim,
 	createExternalOvercollateralizationClaim,
-	createOffchainOnchainOvercollateralizationClaim,
 	createOvercollateralizationRatioClaim,
 	createFundManagerEmailClaim,
 	createTotalNavClaim,
@@ -361,17 +360,23 @@ const runWorkflow = async (
 
 				const opsSupplyTokens = Number(BigInt(opsClaimData.totalSupplyCrossChainReportedByOps)) / 1e18
 				let totalSupplyTokens = opsSupplyTokens
-				try {
-					const supplyData = fetchSupplyDetails(runtime, tokenConfig.oneTokenApi.tokenName)
-					const tsGap = Math.abs(supplyData.timestamp - oraclePriceData.updatedAt)
-					if (tsGap <= 3600) {
-						totalSupplyTokens = supplyData.supply
-						runtime.log(`prices/details supply: ${supplyData.supply.toFixed(6)} tokens (ts gap: ${tsGap}s) ✓`)
-					} else {
-						runtime.log(`prices/details supply timestamp mismatch (gap: ${tsGap}s > 3600s) — using ops supply: ${opsSupplyTokens.toFixed(6)}`)
+				// fetchSupplyDetails skipped for tokens with fundManager (Vlayer) — HTTP call budget is tight (limit=5)
+				// TODO: replace with Midas supply explorer API at oracle timestamp (week of 2026-05-18)
+				if (!tokenConfig.fundManager) {
+					try {
+						const supplyData = fetchSupplyDetails(runtime, tokenConfig.oneTokenApi.tokenName)
+						const tsGap = Math.abs(supplyData.timestamp - oraclePriceData.updatedAt)
+						if (tsGap <= 3600) {
+							totalSupplyTokens = supplyData.supply
+							runtime.log(`prices/details supply: ${supplyData.supply.toFixed(6)} tokens (ts gap: ${tsGap}s) ✓`)
+						} else {
+							runtime.log(`prices/details supply timestamp mismatch (gap: ${tsGap}s > 3600s) — using ops supply: ${opsSupplyTokens.toFixed(6)}`)
+						}
+					} catch (e) {
+						runtime.log(`WARN: prices/details failed, using ops supply: ${e instanceof Error ? e.message : String(e)}`)
 					}
-				} catch (e) {
-					runtime.log(`WARN: prices/details failed, using ops supply: ${e instanceof Error ? e.message : String(e)}`)
+				} else {
+					runtime.log(`Using ops supply for method-1 (supply explorer pending): ${opsSupplyTokens.toFixed(6)} tokens`)
 				}
 
 				const timestamps = computeOneTokenTimestamps(new Date(oraclePriceData.updatedAt * 1000).toISOString())
@@ -382,7 +387,10 @@ const runWorkflow = async (
 
 					const evaluateReport = (report: OneTokenReportData, ts: string): boolean => {
 						const useNavBase = tokenConfig.oneTokenApi!.useNavBase && typeof report.navBase === 'number'
-						const oneTokenAUM = useNavBase ? report.navBase! : report.equity.total * 1_000_000
+						const oneTokenOnchainAUM = useNavBase ? report.navBase! : report.equity.total * 1_000_000
+						// For tokens with Vlayer (fundManager), add Fasanara email NAV to on-chain AUM
+						const fasanaraAUM = tokenConfig.fundManager && fasanaraNavUSD != null ? fasanaraNavUSD : 0
+						const oneTokenAUM = oneTokenOnchainAUM + fasanaraAUM
 						const navPerToken = totalSupplyTokens > 0 ? oneTokenAUM / totalSupplyTokens : 0
 						const ratio = oraclePriceUSD > 0 ? navPerToken / oraclePriceUSD : 0
 
@@ -394,7 +402,11 @@ const runWorkflow = async (
 							runtime.log(`1token vs ops deviation: ${opsDeviation.toFixed(2)}% (threshold: ${deviationThreshold}%)${flag}`)
 						}
 
-						runtime.log(`1token ratio: ${ratio.toFixed(4)} (AUM=${oneTokenAUM.toFixed(0)}, ts=${ts}, threshold: ${runtime.config.overcollateralizationThreshold})`)
+						if (fasanaraAUM > 0) {
+							runtime.log(`1token ratio: ${ratio.toFixed(4)} (onchain=${oneTokenOnchainAUM.toFixed(0)}, fasanara=${fasanaraAUM.toFixed(0)}, total=${oneTokenAUM.toFixed(0)}, ts=${ts}, threshold: ${runtime.config.overcollateralizationThreshold})`)
+						} else {
+							runtime.log(`1token ratio: ${ratio.toFixed(4)} (AUM=${oneTokenAUM.toFixed(0)}, ts=${ts}, threshold: ${runtime.config.overcollateralizationThreshold})`)
+						}
 						return ratio > runtime.config.overcollateralizationThreshold
 					}
 
@@ -419,44 +431,16 @@ const runWorkflow = async (
 						if (passed) {
 							oneTokenReport = report
 						} else {
-							runtime.log('1token ratio below threshold — trying offchain-onchain path')
+							runtime.log('1token ratio below threshold — falling back to Method 2')
 						}
 						break
 					}
 					if (!oneTokenRawReport) {
-						runtime.log('No 1token data found — trying offchain-onchain path')
+						runtime.log('No 1token data found — falling back to Method 2')
 					}
 				}
 			} catch (error) {
 				runtime.log(`WARN: 1token check failed (non-fatal): ${error instanceof Error ? error.message : String(error)}`)
-			}
-		}
-
-		// Method 1 fallback: Fasanara email + on-chain assets (mTBILL + USDC)
-
-		let onchainData: OnchainAssetsData | null = null
-
-		if (!oneTokenReport && tokenConfig.onchainAssets) {
-			try {
-				runtime.log('Method 1 fallback: trying Fasanara + on-chain assets...')
-				const totalSupplyTokens = Number(BigInt(opsClaimData.totalSupplyCrossChainReportedByOps)) / 1e18
-
-				const fetchedOnchainData = readOnchainAssets(runtime, tokenConfig.onchainAssets)
-				const totalVerifiedAUM = (fasanaraNavUSD ?? 0) + fetchedOnchainData.mtbillValueUSD + fetchedOnchainData.usdcValueUSD
-				const navPerToken = totalSupplyTokens > 0 ? totalVerifiedAUM / totalSupplyTokens : 0
-				const ratio = oraclePriceUSD > 0 ? navPerToken / oraclePriceUSD : 0
-				runtime.log(
-					`Offchain-onchain ratio: ${ratio.toFixed(4)} ` +
-					`(fasanara=${(fasanaraNavUSD ?? 0).toFixed(2)}, mtbill=${fetchedOnchainData.mtbillValueUSD.toFixed(2)}, usdc=${fetchedOnchainData.usdcValueUSD.toFixed(2)}, threshold: ${runtime.config.overcollateralizationThreshold})`
-				)
-
-				if (ratio > runtime.config.overcollateralizationThreshold) {
-					onchainData = fetchedOnchainData
-				} else {
-					runtime.log('Offchain-onchain ratio below threshold — falling back to Method 2')
-				}
-			} catch (error) {
-				runtime.log(`WARN: offchain-onchain check failed (non-fatal): ${error instanceof Error ? error.message : String(error)}`)
 			}
 		}
 
@@ -466,11 +450,11 @@ const runWorkflow = async (
 		const navUsed = parseFloat(opsClaimData.navReportedByOps)
 		const internalNavPerToken = totalSupplyTokens > 0 ? navUsed / totalSupplyTokens : 0
 		const internalRatio = oraclePriceUSD > 0 ? internalNavPerToken / oraclePriceUSD : 0
-		const internalPassed = !oneTokenReport && !onchainData
+		const internalPassed = !oneTokenReport
 			? internalRatio > runtime.config.overcollateralizationThreshold
 			: false
 
-		if (!oneTokenReport && !onchainData) {
+		if (!oneTokenReport) {
 			runtime.log(`Method 2 (internal) ratio: ${internalRatio.toFixed(4)} (passed: ${internalPassed})`)
 		}
 
@@ -479,15 +463,12 @@ const runWorkflow = async (
 		let overcollateralizationType: string
 		if (oneTokenReport) {
 			overcollateralizationType = 'external-data'
-		} else if (onchainData) {
-			overcollateralizationType = 'offchain-onchain-data'
 		} else if (internalPassed) {
 			overcollateralizationType = 'internal-data'
 		} else {
 			throw new Error(
 				`Overcollateralization check failed for ${tokenConfig.name}. ` +
 				`Method 1 (1token): unavailable or failed. ` +
-				`Method 1 fallback (offchain-onchain): ${tokenConfig.onchainAssets ? 'failed' : 'not configured'}. ` +
 				`Method 2 (internal): ratio=${internalRatio.toFixed(4)}, threshold=${runtime.config.overcollateralizationThreshold}. ` +
 				`Attestation will not be pushed.`
 			)
@@ -507,14 +488,7 @@ const runWorkflow = async (
 		const overcollateralizationClaim = oneTokenReport
 			? createExternalOvercollateralizationClaim(
 				oneTokenReport.equity.total,
-				opsClaimData,
-				oraclePriceData,
-				runtime.config.overcollateralizationThreshold,
-			)
-			: onchainData
-			? createOffchainOnchainOvercollateralizationClaim(
-				onchainData,
-				fasanaraNavUSD ?? 0,
+				fasanaraNavUSD,
 				opsClaimData,
 				oraclePriceData,
 				runtime.config.overcollateralizationThreshold,
@@ -533,7 +507,7 @@ const runWorkflow = async (
 
 		const attestationBuilder = new AttestationBuilder({
 			issuer: { identity: attesterPublicKey, name: 'Midas' },
-			publicKeySource: 'https://midas.xyz/.well-known/save-keys.json',
+			publicKeySource: 'https://midas.app/.well-known/save-keys.json',
 			createdAt: now.toISOString(),
 			expiresAt: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString(),
 			proofId,
@@ -579,7 +553,8 @@ const runWorkflow = async (
 		runtime.log(`Compressed to ${compressedAttestation.length} bytes`)
 
 		const pinataJwt = runtime.getSecret({ id: 'pinatajwt' }).result().value as string
-		const pinataGroupId = runtime.getSecret({ id: 'attestationpinatagroupid' }).result().value as string | undefined
+		let pinataGroupId: string | undefined
+		try { pinataGroupId = runtime.getSecret({ id: 'attestationpinatagroupid' }).result().value as string } catch { pinataGroupId = undefined }
 
 		const attestationCid = runtime.runInNodeMode(
 			(nodeRuntime: NodeRuntime<Config>) => pushToIpfsPinata(

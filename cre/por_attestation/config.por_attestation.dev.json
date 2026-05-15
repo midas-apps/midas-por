@@ -40,7 +40,7 @@
     "url": "https://gateway.pinata.cloud"
   },
   "ipfsPinataEndpoint": {
-    "url": "https://api.pinata.cloud",
+    "url": "https://api.pinata.cloud"
   },
   "attester": {
     "publicKey": "0x036ff44311df70aa07597ea86e472ab2f0fbc4111b4a5dc143c318f6513a0f2d8d"
@@ -65,23 +65,6 @@
       },
       "oneTokenApi": {
         "tokenName": "mFONE"
-      },
-      "onchainAssets": {
-        "mtbillWallets": [
-          "0x4dc293e0d6BEfe6FCF9d1FFDEaA5266BD15C3071"
-        ],
-        "mtbillTokenAddress": "0xDD629E5241CbC5919847783e6C96B2De4754e438",
-        "mtbillTokenDecimals": 18,
-        "mtbillOracleAddress": "0x056339C044055819E8Db84E71f5f2E1F536b2E5b",
-        "mtbillOracleDecimals": 8,
-        "usdcWallets": [
-          "0x86B16681E21E857A9a71a8FDfC33AB1eB8213b74",
-          "0x4dc293e0d6BEfe6FCF9d1FFDEaA5266BD15C3071",
-          "0xbB273918FE8c9AFac4b6f16Eb8C984DD99b2f407"
-        ],
-        "usdcTokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
-        "usdcTokenDecimals": 6,
-        "chainSelectorName": "ethereum-mainnet"
       }
     },
     "0xf77ebd862996bb55a1c85ab27e4c554e0e77f691d74e8b63bf4849007db4cbc9": {

@@ -33,7 +33,7 @@
     "url": "https://gateway.pinata.cloud"
   },
   "ipfsPinataEndpoint": {
-    "url": "https://api.pinata.cloud",
+    "url": "https://api.pinata.cloud"
   },
   "verifier": {
     "name": "Midas Verifier",

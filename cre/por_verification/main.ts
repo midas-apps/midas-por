@@ -310,7 +310,8 @@ const runWorkflow = async (
 		if (runtime.config.ipfsPinataEndpoint) {
 			// Pinata upload (Midas verifiers)
 			const pinataJwt = runtime.getSecret({ id: 'pinatajwt' }).result().value as string
-			const pinataGroupId = runtime.getSecret({ id: 'verificationpinatagroupid' }).result().value as string | undefined
+			let pinataGroupId: string | undefined
+			try { pinataGroupId = runtime.getSecret({ id: 'verificationpinatagroupid' }).result().value as string } catch { pinataGroupId = undefined }
 			verificationCid = runtime.runInNodeMode(
 				(nodeRuntime: NodeRuntime<Config>) => pushToIpfsPinata(
 					nodeRuntime as any,
