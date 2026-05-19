@@ -167,7 +167,7 @@ To add a new token: add an entry to `tokens` in the config and redeploy.
 Attestations are signed by the attester wallet. The public key is embedded in each attestation along with a `publicKeySource` URL pointing to:
 
 ```
-https://midas.app/.well-known/save-keys.json
+https://midas.app/public/attestation-engine/pubkeys.json
 ```
 
 This file should list the attester public key so that anyone can independently verify attestation signatures without contacting Midas.

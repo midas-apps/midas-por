@@ -2,11 +2,11 @@
   "name": "midas_por_attestation_dev",
   "newClaimLogTrigger": {
     "chainSelectorName": "ethereum-testnet-sepolia",
-    "address": "0x4AbE1936AEc4aAC8177eC65e437A1f8726Bc7F10",
+    "address": "<SAVE_REGISTRY_SEPOLIA_ADDRESS>",
     "topics": [
       {
         "values": [
-          "0x72b189dd90d0f37602e786b240689da1e2575b2e48c418dcf9f6ae1a4ca7b501"
+          "<NEW_CLAIM_EVENT_TOPIC>"
         ]
       },
       {
@@ -17,7 +17,7 @@
       },
       {
         "values": [
-          "0xcecc8202c7e9b8654414c0de09657c531f6ece617258c3682ac4317cbf462120"
+          "<OPS_CLAIM_TYPE_HASH>"
         ]
       }
     ],
@@ -27,12 +27,12 @@
     "authorizedKeys": [
       {
         "type": "KEY_TYPE_ECDSA_EVM",
-        "publicKey": "0x9118964074e2AA11393ce0797264759dB2F2ef69"
+        "publicKey": "<YOUR_AUTHORIZED_KEY_ADDRESS>"
       }
     ]
   },
   "attesterProxy": {
-    "address": "0x2D61a2a3d95ec455Bcf58B439ee1cF1904fD3fF9",
+    "address": "<YOUR_ATTESTER_PROXY_SEPOLIA_ADDRESS>",
     "gasLimit": "1000000",
     "readConfidence": "latest"
   },
@@ -43,7 +43,7 @@
     "url": "https://api.pinata.cloud"
   },
   "attester": {
-    "publicKey": "0x036ff44311df70aa07597ea86e472ab2f0fbc4111b4a5dc143c318f6513a0f2d8d"
+    "publicKey": "<YOUR_ATTESTER_PUBLIC_KEY>"
   },
   "overcollateralizationThreshold": 0.995,
   "tokens": {
@@ -52,15 +52,7 @@
       "fundManager": {
         "expectedEmail": "@fasanara.com",
         "requiredReceiverEmail": "midas@vlayer.xyz",
-        "allowedReceiverEmails": [
-          "antoine@midas.app",
-          "maryjane@midas.app",
-          "terome@midas.app",
-          "sheryll@midas.app",
-          "emeric@midas.app",
-          "lisa@midas.app",
-          "mfone@eo.app"
-        ],
+        "allowedReceiverEmails": [],
         "tokenName": "mFONE"
       },
       "oneTokenApi": {

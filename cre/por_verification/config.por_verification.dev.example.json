@@ -2,10 +2,10 @@
   "name": "midas_por_verification_dev",
   "attestationSetLogTrigger": {
     "chainSelectorName": "ethereum-testnet-sepolia",
-    "address": "0x4AbE1936AEc4aAC8177eC65e437A1f8726Bc7F10",
+    "address": "<SAVE_REGISTRY_SEPOLIA_ADDRESS>",
     "topics": [
       {
-        "values": ["0x9e49776c5287164e09f584ffc1d95620421d3193b4e4b6a88bee160aedbc7b5b"]
+        "values": ["<ATTESTATION_SET_EVENT_TOPIC>"]
       },
       {
         "values": []
@@ -20,12 +20,12 @@
     "authorizedKeys": [
       {
         "type": "KEY_TYPE_ECDSA_EVM",
-        "publicKey": "0x9118964074e2AA11393ce0797264759dB2F2ef69"
+        "publicKey": "<YOUR_AUTHORIZED_KEY_ADDRESS>"
       }
     ]
   },
   "verifierProxy": {
-    "address": "0x2D61a2a3d95ec455Bcf58B439ee1cF1904fD3fF9",
+    "address": "<YOUR_VERIFIER_PROXY_SEPOLIA_ADDRESS>",
     "gasLimit": "1000000",
     "readConfidence": "latest"
   },
@@ -36,8 +36,8 @@
     "url": "https://api.pinata.cloud"
   },
   "verifier": {
-    "name": "Midas Verifier",
-    "publicKey": "0x036ff44311df70aa07597ea86e472ab2f0fbc4111b4a5dc143c318f6513a0f2d8d"
+    "name": "<YOUR_VERIFIER_NAME>",
+    "publicKey": "<YOUR_VERIFIER_PUBLIC_KEY>"
   },
   "vlayerEndpoint": {
     "url": "https://web-prover.vlayer.xyz/api/v1/verify",

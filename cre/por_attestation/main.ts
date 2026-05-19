@@ -507,7 +507,7 @@ const runWorkflow = async (
 
 		const attestationBuilder = new AttestationBuilder({
 			issuer: { identity: attesterPublicKey, name: 'Midas' },
-			publicKeySource: 'https://midas.app/.well-known/save-keys.json',
+			publicKeySource: 'https://midas.app/public/attestation-engine/pubkeys.json',
 			createdAt: now.toISOString(),
 			expiresAt: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString(),
 			proofId,
