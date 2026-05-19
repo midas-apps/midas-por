@@ -1,5 +1,9 @@
 /**
- * Shared IPFS functions for both mhyper_attestation and mhyper_verification workflows
+ * Shared IPFS functions for both attestation and verification workflows
+ *
+ * DIFF between workflows:
+ *   - Attestation uses Pinata API (pinFileToIPFS + JWT Bearer) via pushToIpfsPinata
+ *   - Verification uses Kubo RPC (/api/v0/add + Basic auth) via pushToIpfs
  */
 
 import { HTTPClient, type NodeRuntime } from '@chainlink/cre-sdk'
@@ -7,7 +11,19 @@ import * as pako from 'pako'
 import { stringToBase64, uint8ArrayToBase64, canonicalStringify } from './utils.js'
 
 /**
- * Generic config interface for IPFS operations
+ * Config interface for attestation workflow (Pinata upload)
+ */
+export interface IPFSPinataConfig {
+	ipfsHttpEndpoint: {
+		url: string
+	}
+	ipfsPinataEndpoint: {
+		url: string
+	}
+}
+
+/**
+ * Config interface for verification workflow (Kubo upload)
  */
 export interface IPFSConfig {
 	ipfsHttpEndpoint: {
@@ -176,4 +192,89 @@ export function pushToIpfs<T extends IPFSConfig>(
 	}
 
 	return result.Hash
+}
+
+// ============================================================================
+// IPFS Upload Functions (Pinata) — used by attestation workflow
+// ============================================================================
+
+/**
+ * Push binary data to IPFS via Pinata pinFileToIPFS API
+ *
+ * @param nodeRuntime - NodeRuntime context for HTTP requests
+ * @param data - Binary data to upload
+ * @param pinataJwt - Pinata JWT for authentication
+ * @param filename - Filename for the uploaded content
+ * @param contentType - Content-Type header for the file
+ * @returns IPFS CID (hash) of the uploaded content
+ */
+export function pushToIpfsPinata<T extends IPFSPinataConfig>(
+	nodeRuntime: NodeRuntime<T>,
+	data: Uint8Array,
+	pinataJwt: string,
+	filename: string = 'data.bin',
+	contentType: string = 'application/octet-stream',
+	groupId?: string,
+): string {
+	const { url: pinataUrl } = nodeRuntime.config.ipfsPinataEndpoint
+
+	const boundary = '----CREFormBoundary7MA4YWxkTrZu0gW'
+
+	const enc = new TextEncoder()
+
+	const optionsPart = groupId
+		? enc.encode([
+			`--${boundary}`,
+			`Content-Disposition: form-data; name="pinataOptions"`,
+			``,
+			JSON.stringify({ groupId }),
+			``
+		].join('\r\n'))
+		: new Uint8Array(0)
+
+	const header = enc.encode([
+		`--${boundary}`,
+		`Content-Disposition: form-data; name="file"; filename="${filename}"`,
+		`Content-Type: ${contentType}`,
+		``,
+		``
+	].join('\r\n'))
+
+	const footer = enc.encode([
+		``,
+		`--${boundary}--`,
+		``
+	].join('\r\n'))
+
+	const multipartBodyBytes = new Uint8Array(optionsPart.length + header.length + data.length + footer.length)
+	multipartBodyBytes.set(optionsPart, 0)
+	multipartBodyBytes.set(header, optionsPart.length)
+	multipartBodyBytes.set(data, optionsPart.length + header.length)
+	multipartBodyBytes.set(footer, optionsPart.length + header.length + data.length)
+
+	const httpClient = new HTTPClient()
+
+	const response = httpClient.sendRequest(nodeRuntime, {
+		url: `${pinataUrl}/pinning/pinFileToIPFS`,
+		method: 'POST' as const,
+		headers: {
+			'Content-Type': `multipart/form-data; boundary=${boundary}`,
+			'Authorization': `Bearer ${pinataJwt}`,
+		},
+		body: uint8ArrayToBase64(multipartBodyBytes),
+		timeout: '10s',
+		cacheSettings: { store: true, maxAge: '30s' },
+	}).result()
+
+	if (response.statusCode !== 200) {
+		throw new Error(`Pinata upload failed: ${response.statusCode}`)
+	}
+
+	const result = JSON.parse(new TextDecoder().decode(response.body))
+
+	if (!result.IpfsHash) {
+		throw new Error('Pinata response missing IpfsHash field')
+	}
+
+	return result.IpfsHash
 }

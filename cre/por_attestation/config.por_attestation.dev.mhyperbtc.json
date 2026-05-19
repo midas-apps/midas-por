@@ -1,0 +1,55 @@
+{
+  "name": "midas_nav_por_attestation_mhyperbtc_dev",
+  "newClaimLogTrigger": {
+    "chainSelectorName": "ethereum-testnet-sepolia",
+    "address": "0x4AbE1936AEc4aAC8177eC65e437A1f8726Bc7F10",
+    "topics": [
+      {
+        "values": [
+          "0x72b189dd90d0f37602e786b240689da1e2575b2e48c418dcf9f6ae1a4ca7b501"
+        ]
+      },
+      {
+        "values": [
+          "0xf77ebd862996bb55a1c85ab27e4c554e0e77f691d74e8b63bf4849007db4cbc9"
+        ]
+      },
+      {
+        "values": []
+      },
+      {
+        "values": [
+          "0xcecc8202c7e9b8654414c0de09657c531f6ece617258c3682ac4317cbf462120"
+        ]
+      }
+    ],
+    "confidence": "latest"
+  },
+  "httpTrigger": {
+    "authorizedKeys": [
+      {
+        "type": "KEY_TYPE_ECDSA_EVM",
+        "publicKey": "<YOUR_AUTHORIZED_KEY_ADDRESS>"
+      }
+    ]
+  },
+  "attesterProxy": {
+    "address": "<YOUR_ATTESTER_PROXY_ADDRESS>",
+    "gasLimit": "1000000",
+    "readConfidence": "latest"
+  },
+  "ipfsHttpEndpoint": {
+    "url": "https://ipfs.io"
+  },
+  "ipfsRpcEndpoint": {
+    "url": "<YOUR_IPFS_RPC_URL>",
+    "username": "<YOUR_IPFS_USERNAME>"
+  },
+  "attester": {
+    "publicKey": "<YOUR_ATTESTER_PUBLIC_KEY>"
+  },
+  "overcollateralizationThreshold": 0.995,
+  "oneTokenApi": {
+    "tokenName": "mHyperBTC"
+  }
+}
